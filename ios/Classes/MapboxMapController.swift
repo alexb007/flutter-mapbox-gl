@@ -4,6 +4,8 @@ import Mapbox
 
 class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, MapboxMapOptionsSink {
     
+    private var registrar: FlutterPluginRegistrar
+    
     private var mapView: MGLMapView
     private var isMapReady = false
     private var mapReadyResult: FlutterResult?
@@ -35,13 +37,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         return mapView
     }
     
-    init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, binaryMessenger messenger: FlutterBinaryMessenger) {
+    init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, registrar: FlutterPluginRegistrar) {
         mapView = MGLMapView(frame: frame)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        
+        self.registrar = registrar
+
         super.init()
         
-        let channel = FlutterMethodChannel(name: "plugins.flutter.io/mapbox_maps_\(viewId)", binaryMessenger: messenger)
+        let channel = FlutterMethodChannel(name: "plugins.flutter.io/mapbox_maps_\(viewId)", binaryMessenger: registrar.messenger())
         channel.setMethodCallHandler(onMethodCall)
         
         mapView.delegate = self
@@ -86,7 +89,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 
                 // Add marker to the map.
                 mapView.addAnnotation(marker)
-                result("Pos: \(position)")
+                result("Path: \(position)")
             } else {
                 result(nil)
             }
@@ -139,6 +142,38 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let intersects = MGLCoordinateInCoordinateBounds(newVisibleCoordinates.ne, bbox) && MGLCoordinateInCoordinateBounds(newVisibleCoordinates.sw, bbox)
         
         return inside && intersects
+    }
+
+    func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
+        // Try to reuse the existing ‘pisa’ annotation image, if it exists.
+        let identifier = "marker"
+        var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: identifier)
+         
+        if annotationImage == nil {
+            // TODO: remove this hardcoded asset identifier.
+            let key = registrar.lookupKey(forAsset: "assets/markers/custom_marker.png")
+            if let path = Bundle.main.path(forResource: key, ofType: nil),
+                let imageUrl: URL = URL(fileURLWithPath: path),
+                let imageData: Data = try? Data(contentsOf: imageUrl) {
+
+                //TODO: more robust force unwrapping.
+                var image: UIImage = UIImage(data: imageData, scale: UIScreen.main.scale)!
+                
+                //TODO: Repositioning marker (code below) does not seem to work.
+                // The anchor point of an annotation is currently always the center. To
+                // shift the anchor point to the bottom of the annotation, the image
+                // asset includes transparent bottom padding equal to the original image
+                // height.
+                //
+                // To make this padding non-interactive, we create another image object
+                // with a custom alignment rect that excludes the padding.
+                image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
+                
+                // Initialize the annotation image with the UIImage we just loaded.
+                annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: identifier)
+            }
+        }
+        return annotationImage
     }
 
     // Allow callout view to appear when an annotation is tapped.
