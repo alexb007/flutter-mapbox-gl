@@ -73,6 +73,23 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             } else {
                 result(nil)
             }
+        case "marker#add":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let options = arguments["options"] as? [String: Any] else { return }
+
+            if let position = options["position"] as? [Double] {
+                // Create marker.
+                let marker = MGLPointAnnotation()
+                marker.coordinate = CLLocationCoordinate2D(latitude: position[0], longitude: position[1])
+                marker.title = "Hello world!"
+                marker.subtitle = "I'm at \(position)"
+
+                // Add marker to the map.
+                mapView.addAnnotation(marker)
+                result("Pos: \(position)")
+            } else {
+                result(nil)
+            }
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -122,6 +139,11 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let intersects = MGLCoordinateInCoordinateBounds(newVisibleCoordinates.ne, bbox) && MGLCoordinateInCoordinateBounds(newVisibleCoordinates.sw, bbox)
         
         return inside && intersects
+    }
+
+    // Allow callout view to appear when an annotation is tapped.
+    func mapView(_ mapView: MGLMapView, annotationCanShowCallout annotation: MGLAnnotation) -> Bool {
+        return true
     }
     
     /*
