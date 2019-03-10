@@ -58,20 +58,20 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             } else {
                 result(nil)
             }
-        case "marker#add":
+        case "symbol#add":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let options = arguments["options"] as? [String: Any] else { return }
 
-            if let position = options["position"] as? [Double] {
+            if let geometry = options["geometry"] as? [Double] {
                 // Create marker.
                 let marker = MGLPointAnnotation()
-                marker.coordinate = CLLocationCoordinate2D(latitude: position[0], longitude: position[1])
+                marker.coordinate = CLLocationCoordinate2D(latitude: geometry[0], longitude: geometry[1])
                 marker.title = "Hello world!"
-                marker.subtitle = "I'm at \(position)"
+                marker.subtitle = "I'm at \(geometry)"
 
                 // Add marker to the map.
                 mapView.addAnnotation(marker)
-                result("Path: \(position)")
+                result("Path: \(geometry)")
             } else {
                 result(nil)
             }
