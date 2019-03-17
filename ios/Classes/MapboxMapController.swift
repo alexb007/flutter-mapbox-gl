@@ -60,18 +60,13 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             }
         case "symbol#add":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
-            guard let options = arguments["options"] as? [String: Any] else { return }
-
-            if let geometry = options["geometry"] as? [Double] {
-                // Create marker.
-                let marker = MGLPointAnnotation()
-                marker.coordinate = CLLocationCoordinate2D(latitude: geometry[0], longitude: geometry[1])
-                marker.title = "Hello world!"
-                marker.subtitle = "I'm at \(geometry)"
-
-                // Add marker to the map.
-                mapView.addAnnotation(marker)
-                result("Location: \(geometry)")
+           
+            // Create a symbol and populate it.
+            let symbol = Symbol()
+            Convert.interpretSymbolOptions(options: arguments["options"], delegate: symbol)
+            if CLLocationCoordinate2DIsValid(symbol.geometry) {
+                mapView.addAnnotation(symbol)
+                result(symbol.id)
             } else {
                 result(nil)
             }
@@ -127,14 +122,17 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     }
 
     func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
-        // Try to reuse the existing ‘pisa’ annotation image, if it exists.
-        let identifier = "marker"
-        var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: identifier)
-         
+        // Only for Symbols images are loaded.
+        guard let symbol = annotation as? Symbol,
+            let iconImage = symbol.iconImage else {
+                return nil
+        }
+        // Reuse existing annotations for better performance.
+        var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage)
+        
         if annotationImage == nil {
             // TODO: remove this hardcoded asset identifier.
             let assetPath = registrar.lookupKey(forAsset: "assets/symbols/")
-            let iconImage = "camera.png"
             let image = UIImage.loadFromFile(imagePath: assetPath, imageName: iconImage)
             // Initialize the annotation image with the UIImage we just loaded (if present).
             if let image = image {
