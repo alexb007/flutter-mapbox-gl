@@ -71,7 +71,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 
                 // Add marker to the map.
                 mapView.addAnnotation(marker)
-                result("Path: \(geometry)")
+                result("Location: \(geometry)")
             } else {
                 result(nil)
             }
@@ -133,7 +133,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
          
         if annotationImage == nil {
             // TODO: remove this hardcoded asset identifier.
-            let key = registrar.lookupKey(forAsset: "assets/markers/custom_marker.png")
+            let key = registrar.lookupKey(forAsset: "assets/symbols/camera.png")
             if let path = Bundle.main.path(forResource: key, ofType: nil),
                 let imageUrl: URL = URL(fileURLWithPath: path),
                 let imageData: Data = try? Data(contentsOf: imageUrl) {
