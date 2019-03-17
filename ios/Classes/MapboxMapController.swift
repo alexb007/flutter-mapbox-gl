@@ -133,26 +133,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
          
         if annotationImage == nil {
             // TODO: remove this hardcoded asset identifier.
-            let key = registrar.lookupKey(forAsset: "assets/symbols/camera.png")
-            if let path = Bundle.main.path(forResource: key, ofType: nil),
-                let imageUrl: URL = URL(fileURLWithPath: path),
-                let imageData: Data = try? Data(contentsOf: imageUrl) {
-
-                //TODO: more robust force unwrapping.
-                var image: UIImage = UIImage(data: imageData, scale: UIScreen.main.scale)!
-                
-                //TODO: Repositioning marker (code below) does not seem to work.
-                // The anchor point of an annotation is currently always the center. To
-                // shift the anchor point to the bottom of the annotation, the image
-                // asset includes transparent bottom padding equal to the original image
-                // height.
-                //
-                // To make this padding non-interactive, we create another image object
-                // with a custom alignment rect that excludes the padding.
-                image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
-                
-                // Initialize the annotation image with the UIImage we just loaded.
-                annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: identifier)
+            let assetPath = registrar.lookupKey(forAsset: "assets/symbols/")
+            let iconImage = "camera.png"
+            let image = UIImage.loadFromFile(imagePath: assetPath, imageName: iconImage)
+            // Initialize the annotation image with the UIImage we just loaded (if present).
+            if let image = image {
+                annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: iconImage)
             }
         }
         return annotationImage
