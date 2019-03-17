@@ -34,4 +34,18 @@ class Convert {
             delegate.setMyLocationEnabled(myLocationEnabled: myLocationEnabled)
         }
     }
+    
+    class func interpretSymbolOptions(options: Any?, delegate: SymbolOptionsSink) {
+        guard let options = options as? [String: Any] else { return }
+        
+        if let geometry = options["geometry"] as? [Double] {
+            delegate.setGeometry(geometry: geometry)
+        }
+        if let iconImage = options["iconImage"] as? String {
+            delegate.setIconImage(iconImage: iconImage)
+        }
+        if let textField = options["textField"] as? String {
+            delegate.setTextField(textField: textField)
+        }
+    }
 }
