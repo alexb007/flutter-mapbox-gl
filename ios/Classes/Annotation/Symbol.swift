@@ -18,9 +18,13 @@ class Symbol : MGLPointAnnotation, SymbolOptionsSink {
     // MARK: Setters
     
     func setGeometry(geometry: [Double]) {
-        //TODO: input validation.
-        coordinate = CLLocationCoordinate2D(latitude: geometry[0], longitude: geometry[1])
+        if geometry.count == 2, -90...90 ~= geometry[0], -180...180 ~= geometry[1] {
+            coordinate = CLLocationCoordinate2D(latitude: geometry[0], longitude: geometry[1])
+        } else {
+            NSLog("Invalid geometry")
+        }
     }
+    
     func setIconImage(iconImage: String) {
         _iconImage = iconImage
     }
