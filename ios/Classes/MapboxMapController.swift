@@ -58,9 +58,21 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             } else {
                 result(nil)
             }
+        case "camera#move":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
+            if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
+                mapView.setCamera(camera, animated: false)
+            }
+        case "camera#animate":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
+            if let camera = Convert.parseCameraUpdate(cameraUpdate: cameraUpdate, mapView: mapView) {
+                mapView.setCamera(camera, animated: true)
+            }
         case "symbol#add":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
-           
+            
             // Create a symbol and populate it.
             let symbol = Symbol()
             Convert.interpretSymbolOptions(options: arguments["options"], delegate: symbol)
@@ -160,11 +172,15 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         mapView.minimumZoomLevel = min
         mapView.maximumZoomLevel = max
     }
-    func setStyleString(style: String) {
-        if let styleURL = MapboxMapStyle.MapboxMapStyleLookup[style] {
-            mapView.styleURL = styleURL
+    func setStyleString(styleString: String) {
+        // Check if json, url or plain string:
+        if styleString.isEmpty {
+            NSLog("setStyleString - string empty")
+        } else if (styleString.hasPrefix("{") || styleString.hasPrefix("[")) {
+            // Currently the iOS Mapbox SDK does not have a builder for json.
+            NSLog("setStyleString - JSON style currently not supported")
         } else {
-            mapView.styleURL = MGLStyle.streetsStyleURL
+            mapView.styleURL = MapboxMapStyle.fromUrl(styleString: styleString)
         }
     }
     func setRotateGesturesEnabled(rotateGesturesEnabled: Bool) {
