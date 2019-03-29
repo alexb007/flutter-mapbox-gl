@@ -134,4 +134,47 @@ class Convert {
             delegate.setTextField(textField: textField)
         }
     }
+    
+    class func interpretLineOptions(options: Any?, delegate: LineOptionsSink) {
+        guard let options = options as? [String: Any] else { return }
+        
+        if let geometry = options["geometry"] as? [[Double]] {
+            delegate.setGeometry(geometry: geometry)
+        }
+        if let lineColor = options["lineColor"] as? String {
+            delegate.setLineColor(lineColor: lineColor)
+        }
+    }
+    
+    class func interpretCircleOptions(options: Any?, delegate: CircleOptionsSink) {
+        guard let options = options as? [String: Any] else { return }
+        
+        if let geometry = options["geometry"] as? [Double] {
+            delegate.setGeometry(geometry: geometry)
+        }
+        if let circleRadius = options["circleRadius"] as? Float {
+            delegate.setCircleRadius(circleRadius: circleRadius)
+        }
+        if let circleColor = options["circleColor"] as? String {
+            delegate.setCircleColor(circleColor: circleColor)
+        }
+        if let circleBlur = options["circleBlur"] as? Float {
+            delegate.setCircleBlur(circleBlur: circleBlur)
+        }
+        if let circleOpacity = options["circleOpacity"] as? Float {
+            delegate.setCircleOpacity(circleOpacity: circleOpacity)
+        }
+        if let circleStrokeWidth = options["circleStrokeWidth"] as? Float {
+            delegate.setCircleStrokeWidth(circleStrokeWidth: circleStrokeWidth)
+        }
+        if let circleStrokeColor = options["circleStrokeColor"] as? String {
+            delegate.setCircleStrokeColor(circleStrokeColor: circleStrokeColor)
+        }
+        if let circleStrokeOpacity = options["circleStrokeOpacity"] as? Float {
+            delegate.setCircleStrokeOpacity(circleStrokeOpacity: circleStrokeOpacity)
+        }
+        if let draggable = options["draggable"] as? Bool {
+            delegate.setDraggable(draggable: draggable)
+        }
+    }
 }

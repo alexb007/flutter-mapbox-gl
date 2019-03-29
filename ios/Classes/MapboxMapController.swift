@@ -15,6 +15,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private var trackCameraPosition = false
     private var myLocationEnabled = false
 
+    private var circleManager: CircleManager?
+    
     func view() -> UIView {
         return mapView
     }
@@ -82,6 +84,42 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             } else {
                 result(nil)
             }
+        case "line#add":
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            
+            // Create a line and populate it.
+            let symbol = Symbol()
+            Convert.interpretSymbolOptions(options: arguments["options"], delegate: symbol)
+            if CLLocationCoordinate2DIsValid(symbol.geometry) {
+                mapView.addAnnotation(symbol)
+                result(symbol.id)
+            } else {
+                result(nil)
+            }
+        case "circle#add":
+            guard let circleManager = circleManager else { return }
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+
+            // Create a circle and populate it.
+            let circleBuilder = CircleBuilder(circleManager: circleManager)
+            Convert.interpretCircleOptions(options: arguments["options"], delegate: circleBuilder)
+            let circle = circleBuilder.build()
+//            result(circle.id)
+            
+//            let features = circleManager.source.features(matching: nil)
+//            result(features.description)
+            
+            let circles = Array(circleManager.circles.values)
+            let fc = FeatureCollection<PointGeometry>(features: circles)
+            let data = try! JSONEncoder().encode(fc)
+            result(String(bytes: data, encoding: .utf8))
+        case "circle#remove":
+            guard let circleManager = circleManager else { return }
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let circleId = arguments["circle"] as? Float else { return }
+            
+            circleManager.delete(id: circleId)
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -107,6 +145,10 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             camera.pitch = initialTilt
             mapView.setCamera(camera, animated: false)
         }
+        
+        circleManager = CircleManager(identifier: "circles")
+        style.addSource(circleManager!.source)
+        style.addLayer(circleManager!.layer)
         
         mapReadyResult?(nil)
     }
