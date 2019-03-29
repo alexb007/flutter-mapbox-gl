@@ -2,8 +2,8 @@ import Mapbox
 
 class CircleManager {
     
-    static let ID_GEOJSON_SOURCE = "mapbox-ios-circle-source"
-    static let ID_GEOJSON_LAYER = "mapbox-ios-circle-layer"
+    private let ID_GEOJSON_SOURCE = "mapbox-ios-circle-source"
+    private let ID_GEOJSON_LAYER = "mapbox-ios-circle-layer"
     
     private(set) var source: MGLShapeSource
     private(set) var layer: MGLCircleStyleLayer
@@ -11,9 +11,9 @@ class CircleManager {
     var circles: [Float: Circle]
     private var currentId: Float = 0
     
-    init(identifier: String) {
-        source = MGLShapeSource(identifier: identifier, shape: nil, options: nil)
-        layer = MGLCircleStyleLayer(identifier: identifier, source: source)
+    init() {
+        source = MGLShapeSource(identifier: ID_GEOJSON_SOURCE, shape: nil, options: nil)
+        layer = MGLCircleStyleLayer(identifier: ID_GEOJSON_LAYER, source: source)
         circles = [Float: Circle]()
         
         layer.circleRadius = NSExpression(forKeyPath: CircleOptions.KEY_CIRCLE_RADIUS)

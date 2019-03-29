@@ -146,7 +146,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             mapView.setCamera(camera, animated: false)
         }
         
-        circleManager = CircleManager(identifier: "circles")
+        circleManager = CircleManager()
         style.addSource(circleManager!.source)
         style.addLayer(circleManager!.layer)
         
