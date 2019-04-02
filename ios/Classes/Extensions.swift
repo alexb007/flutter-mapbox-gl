@@ -61,3 +61,6 @@ extension UIImage {
         return nil
     }
 }
+
+// Enables you to throw a string
+extension String: Error {}

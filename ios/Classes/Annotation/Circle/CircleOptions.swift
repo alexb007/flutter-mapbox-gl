@@ -1,6 +1,6 @@
 import Mapbox
 
-class CircleOptions {
+class CircleOptions: Options<PointGeometry> {
     static let KEY_CIRCLE_RADIUS = "circle-radius"
     static let KEY_CIRCLE_COLOR = "circle-color"
     static let KEY_CIRCLE_BLUR = "circle-blur"
@@ -9,18 +9,13 @@ class CircleOptions {
     static let KEY_CIRCLE_STROKE_COLOR = "circle-stroke-color"
     static let KEY_CIRCLE_STROKE_OPACITY = "circle-stroke-opacity"
     
-    var geometry: CLLocationCoordinate2D
-    var properties: [String: AnyEncodable]
-    
-    init() {
-        geometry = kCLLocationCoordinate2DInvalid
-        properties = [String: AnyEncodable]()
-    }
+    var geometry: PointGeometry?
+    var properties = [String: AnyEncodable]()
     
     func setGeometry(geometry: [Double]) {
         let latLng = CLLocationCoordinate2D(latitude: geometry[0], longitude: geometry[1])
         if CLLocationCoordinate2DIsValid(latLng) {
-            self.geometry = latLng
+            self.geometry = PointGeometry(coordinates: [latLng.longitude, latLng.latitude])
         }
     }
 
@@ -56,11 +51,10 @@ class CircleOptions {
         properties[CircleOptions.KEY_CIRCLE_STROKE_OPACITY] = AnyEncodable(circleStrokeOpacity)
     }
     
-    func build(id: Float) -> Circle {
-        if (!CLLocationCoordinate2DIsValid(geometry)) {
-            NSLog("geometry field is required")
+    func build(id: Float) -> Circle? {
+        if let geometry = geometry  {
+            return Circle(id: id, geometry: geometry, properties: properties)
         }
-        let geo = PointGeometry(coordinates: [geometry.longitude, geometry.latitude])
-        return Circle(id: id, geometry: geo, properties: properties)
+        return nil
     }
 }

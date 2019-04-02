@@ -16,6 +16,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private var myLocationEnabled = false
 
     private var circleManager: CircleManager?
+    private var lineManager: LineManager?
     
     func view() -> UIView {
         return mapView
@@ -85,14 +86,16 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 result(nil)
             }
         case "line#add":
+            guard let lineManager = lineManager else { return }
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             
             // Create a line and populate it.
-            let symbol = Symbol()
-            Convert.interpretSymbolOptions(options: arguments["options"], delegate: symbol)
-            if CLLocationCoordinate2DIsValid(symbol.geometry) {
-                mapView.addAnnotation(symbol)
-                result(symbol.id)
+            let lineBuilder = LineBuilder(lineManager: lineManager)
+            Convert.interpretLineOptions(options: arguments["options"], delegate: lineBuilder)
+            if let line = lineBuilder.build() {
+//                result(line.id)
+                let data = try! JSONEncoder().encode(line)
+                result(String(bytes: data, encoding: .utf8))
             } else {
                 result(nil)
             }
@@ -109,10 +112,10 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 //            let features = circleManager.source.features(matching: nil)
 //            result(features.description)
             
-            let circles = Array(circleManager.circles.values)
-            let fc = FeatureCollection<PointGeometry>(features: circles)
-            let data = try! JSONEncoder().encode(fc)
-            result(String(bytes: data, encoding: .utf8))
+//            let circles = Array(circleManager.circles.values)
+//            let fc = FeatureCollection<PointGeometry>(features: circles)
+//            let data = try! JSONEncoder().encode(fc)
+//            result(String(bytes: data, encoding: .utf8))
         case "circle#remove":
             guard let circleManager = circleManager else { return }
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -147,9 +150,16 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
         
         circleManager = CircleManager()
-        style.addSource(circleManager!.source)
-        style.addLayer(circleManager!.layer)
+        if let circleManager = circleManager {
+            style.addSource(circleManager.source)
+            style.addLayer(circleManager.layer!)
+        }
         
+        lineManager = LineManager(identifier: "lines")
+        if let lineManager = lineManager {
+            style.addSource(lineManager.source)
+            style.addLayer(lineManager.layer!)
+        }
         mapReadyResult?(nil)
     }
     
@@ -222,7 +232,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             // Currently the iOS Mapbox SDK does not have a builder for json.
             NSLog("setStyleString - JSON style currently not supported")
         } else {
-            mapView.styleURL = MapboxMapStyle.fromUrl(styleString: styleString)
+            mapView.styleURL = NSURL(string: styleString) as! URL
         }
     }
     func setRotateGesturesEnabled(rotateGesturesEnabled: Bool) {

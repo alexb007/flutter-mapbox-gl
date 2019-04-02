@@ -1,46 +1,27 @@
 import Mapbox
 
-class LineManager {
-
-    static let ID_GEOJSON_SOURCE = "mapbox-ios-line-source";
-    static let ID_GEOJSON_LAYER = "mapbox-ios-line-layer";
-    
-    private var source: MGLShapeSource
-    private var layer: MGLLineStyleLayer
+class LineManager: AnnotationManager<LineGeometry> {
+    private let ID_GEOJSON_SOURCE = "mapbox-ios-line-source"
+    private let ID_GEOJSON_LAYER = "mapbox-ios-line-layer"
+    var layer: MGLLineStyleLayer?
     
     init(identifier: String) {
-        source = MGLShapeSource(identifier: identifier, shape: nil, options: nil)
-        layer = MGLLineStyleLayer(identifier: identifier, source: source)
+        super.init(sourceId: ID_GEOJSON_SOURCE)
+        
+        layer = MGLLineStyleLayer(identifier: ID_GEOJSON_LAYER, source: source)
+        setDataDrivenLayerProperties()
     }
     
-    func setProp() {
-        // From the docs: https://docs.mapbox.com/mapbox-gl-js/style-spec/#layers
-//        layer.lineCap
-//        layer.lineMiterLimit
-//        layer.lineRoundLimit
-//        layer.lineTranslation
-//        layer.lineTranslationAnchor
-//        layer.lineDashPattern
-//        layer.lineGradient
-
-        
-        layer.lineJoin = NSExpression(forConstantValue: "round")
-        layer.lineOpacity = NSExpression(forConstantValue: 1.0)
-        layer.lineColor = NSExpression(forConstantValue: UIColor.red)
-        layer.lineWidth = nil
-        layer.lineGapWidth = nil
-        layer.lineOffset = nil
-        layer.lineBlur = nil
-        layer.linePattern = nil
-//        layer.geometry = nil;
-//        layer.draggable = true;
+    func setDataDrivenLayerProperties() {
+        if let layer = layer {
+//            layer.lineJoin = NSExpression(forKeyPath: LineOptions.KEY_LINE_JOIN)
+//            layer.lineOpacity = NSExpression(forKeyPath: LineOptions.KEY_LINE_OPACITY)
+            layer.lineColor = NSExpression(forKeyPath: LineOptions.KEY_LINE_COLOR)
+            layer.lineWidth = NSExpression(forKeyPath: LineOptions.KEY_LINE_WIDTH)
+//            layer.lineGapWidth = NSExpression(forKeyPath: LineOptions.KEY_LINE_GAP_WIDTH)
+//            layer.lineOffset = NSExpression(forKeyPath: LineOptions.KEY_LINE_OFFSET)
+//            layer.lineBlur = NSExpression(forKeyPath: LineOptions.KEY_LINE_BLUR)
+//            layer.linePattern = NSExpression(forKeyPath: LineOptions.KEY_LINE_PATTERN)
+        }
     }
-    func addLine() {
-        var mutableCoordinates: [CLLocationCoordinate2D] = []
-        
-        let polyline = MGLPolylineFeature(coordinates: &mutableCoordinates, count: UInt(mutableCoordinates.count))
-        
-        source.shape = polyline
-    }
-    
 }

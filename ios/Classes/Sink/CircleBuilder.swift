@@ -10,8 +10,12 @@ class CircleBuilder: CircleOptionsSink {
         circleOptions = CircleOptions()
     }
     
-    func build() -> Circle {
-        return circleManager.create(options: circleOptions)
+    func build() -> Circle? {
+        do {
+            return try circleManager.create(options: circleOptions)
+        } catch {
+            return nil
+        }
     }
     
     func setGeometry(geometry: [Double]) {
