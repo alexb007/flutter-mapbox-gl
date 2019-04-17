@@ -2,7 +2,7 @@ import Mapbox
 
 class LineManager: AnnotationManager<LineGeometry> {
     private let ID_GEOJSON_SOURCE = "mapbox-ios-line-source"
-    private let ID_GEOJSON_LAYER = "mapbox-ios-line-layer"
+    let ID_GEOJSON_LAYER = "mapbox-ios-line-layer"
     var layer: MGLLineStyleLayer?
     
     init() {

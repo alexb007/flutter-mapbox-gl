@@ -17,6 +17,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 
     private var channel: FlutterMethodChannel?
     private var lineManager: LineManager?
+    private var circleManager: CircleManager?
     
     func view() -> UIView {
         return mapView
@@ -57,13 +58,23 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let spot = sender.location(in: mapView)
         
         // Access the features at that point within the state layer.
-        let features = mapView.visibleFeatures(at: spot, styleLayerIdentifiers: Set(["mapbox-ios-line-layer"]))
+        let layerIds = Set([lineManager!.ID_GEOJSON_LAYER, circleManager!.ID_GEOJSON_LAYER])
+        let features = mapView.visibleFeatures(at: spot, styleLayerIdentifiers: layerIds)
         if let feature = features.first, let channel = channel {
-            var arguments: [String: Any] = [:]
-            if let id = feature.identifier {
-                arguments["line"] = "\(id)"
+            if(feature is MGLPolylineFeature) {
+                var arguments: [String: Any] = [:]
+                if let id = feature.identifier {
+                    arguments["line"] = "\(id)"
+                }
+                channel.invokeMethod("line#onTap", arguments: arguments)
             }
-            channel.invokeMethod("line#onTap", arguments: arguments)
+            if(feature is MGLPointFeature) {
+                var arguments: [String: Any] = [:]
+                if let id = feature.identifier {
+                    arguments["circle"] = "\(id)"
+                }
+                channel.invokeMethod("circle#onTap", arguments: arguments)
+            }
         }
     }
     
@@ -140,6 +151,39 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             
             lineManager.delete(annotation: line)
             result(nil)
+        case "circle#add":
+            guard let circleManager = circleManager else { return }
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            
+            // Create a circle and populate it.
+            let circleBuilder = CircleBuilder(circleManager: circleManager)
+            Convert.interpretCircleOptions(options: arguments["options"], delegate: circleBuilder)
+            if let circle = circleBuilder.build() {
+                result("\(circle.id)")
+            } else {
+                result(nil)
+            }
+        case "circle#update":
+            guard let circleManager = circleManager else { return }
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let circleIdString = arguments["circle"] as? String else { return }
+            guard let circleId = UInt64(circleIdString) else { return }
+            guard let circle = circleManager.getAnnotation(id: circleId) else { return }
+            
+            // Create a circle and populate it.
+            let circleBuilder = CircleBuilder(circleManager: circleManager, circle: circle)
+            Convert.interpretCircleOptions(options: arguments["options"], delegate: circleBuilder)
+            circleBuilder.update(id: circleId)
+            result(nil)
+        case "circle#remove":
+            guard let circleManager = circleManager else { return }
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let circleIdString = arguments["circle"] as? String else { return }
+            guard let circleId = UInt64(circleIdString) else { return }
+            guard let circle = circleManager.getAnnotation(id: circleId) else { return }
+            
+            circleManager.delete(annotation: circle)
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -170,6 +214,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         if let lineManager = lineManager {
             style.addSource(lineManager.source)
             style.addLayer(lineManager.layer!)
+        }
+        
+        circleManager = CircleManager()
+        if let circleManager = circleManager {
+            style.addSource(circleManager.source)
+            style.addLayer(circleManager.layer!)
         }
         
         mapReadyResult?(nil)
