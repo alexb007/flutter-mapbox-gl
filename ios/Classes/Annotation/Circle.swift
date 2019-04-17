@@ -1,0 +1,1 @@
+typealias Circle = Annotation<CircleGeometry>

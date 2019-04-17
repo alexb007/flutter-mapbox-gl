@@ -3,6 +3,11 @@ struct LineGeometry: LineString {
     var coordinates: [[Double]]
 }
 
+struct CircleGeometry: Point {
+    let type = "Point"
+    var coordinates: [Double]
+}
+
 // Geometry protocols
 
 protocol Geometry: Encodable {
