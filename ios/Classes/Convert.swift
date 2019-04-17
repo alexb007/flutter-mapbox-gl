@@ -178,4 +178,36 @@ class Convert {
             delegate.setLinePattern(linePattern: linePattern)
         }
     }
+    
+    class func interpretCircleOptions(options: Any?, delegate: CircleOptionsSink) {
+        guard let options = options as? [String: Any] else { return }
+        
+        if let geometry = options["geometry"] as? [Double] {
+            delegate.setGeometry(geometry: geometry)
+        }
+
+        if let circleRadius = options["circleRadius"] as? Double {
+            delegate.setCircleRadius(circleRadius: circleRadius)
+        }
+
+        if let circleColor = options["circleColor"] as? String {
+            delegate.setCircleColor(circleColor: circleColor)
+        }
+        
+        if let circleOpacity = options["circleOpacity"] as? Double {
+            delegate.setCircleOpacity(circleOpacity: circleOpacity)
+        }
+        
+        if let circleStrokeWidth = options["circleStrokeWidth"] as? Double {
+            delegate.setCircleStrokeWidth(circleStrokeWidth: circleStrokeWidth)
+        }
+        
+        if let circleStrokeColor = options["circleStrokeColor"] as? String {
+            delegate.setCircleStrokeColor(circleStrokeColor: circleStrokeColor)
+        }
+        
+        if let circleStrokeOpacity = options["circleStrokeOpacity"] as? Double {
+            delegate.setCircleStrokeOpacity(circleStrokeOpacity: circleStrokeOpacity)
+        }
+    }
 }
