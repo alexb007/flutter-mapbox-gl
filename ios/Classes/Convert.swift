@@ -170,10 +170,6 @@ class Convert {
             delegate.setLineBlur(lineBlur: lineBlur)
         }
         
-        func setLineBlur(lineBlur: Double) {
-            delegate.setLineBlur(lineBlur: lineBlur)
-        }
-
         if let linePattern = options["linePattern"] as? String {
             delegate.setLinePattern(linePattern: linePattern)
         }
