@@ -281,6 +281,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     }
     func setCompassEnabled(compassEnabled: Bool) {
         mapView.compassView.isHidden = compassEnabled
+        mapView.compassView.isHidden = !compassEnabled
     }
     func setMinMaxZoomPreference(min: Double, max: Double) {
         mapView.minimumZoomLevel = min
@@ -318,5 +319,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
         self.myLocationEnabled = myLocationEnabled
         updateMyLocationEnabled()
+    }
+    func setMyLocationTrackingMode(myLocationTrackingMode: MGLUserTrackingMode) {
+        mapView.userTrackingMode = myLocationTrackingMode
     }
 }
