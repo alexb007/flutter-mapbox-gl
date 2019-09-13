@@ -216,6 +216,37 @@ class MapboxMapController extends ChangeNotifier {
     return symbol;
   }
 
+  /// Adds a symbol to the map, configured using the specified custom [options].
+  ///
+  /// Change listeners are notified once the symbol has been added on the
+  /// platform side.
+  ///
+  /// The returned [Future] completes with the added symbol once listeners have
+  /// been notified.
+  Future<List<Symbol>> addAllSymbol(List<SymbolOptions> options) async {
+    var symbols = [];
+    final List<String> symbolIds = await _channel.invokeMethod(
+      'symbol#addAll',
+      <String, List<dynamic>>{
+        'symbols': options.map((option) {
+          return option._toJson();
+        }).toList(),
+      },
+    );
+
+    var index = 0;
+
+    symbolIds.forEach((symbolId) {
+      var effectiveOptions = SymbolOptions.defaultOptions.copyWith(options[index++]);
+      final Symbol symbol = Symbol(symbolId, effectiveOptions);
+      _symbols[symbolId] = symbol;
+      symbols.add(symbol);
+    });
+
+    notifyListeners();
+    return symbols;
+  }
+
   /// Updates the specified [symbol] with the given [changes]. The symbol must
   /// be a current member of the [symbols] set.
   ///

@@ -79,6 +79,39 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
     });
   }
 
+  void _addMulti(String iconImage) {
+    List<SymbolOptions> options = [
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(1 * pi / 6.0) / 20.0,
+            center.longitude + cos(1 * pi / 6.0) / 20.0,
+          ),
+          iconImage: iconImage),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(2 * pi / 6.0) / 20.0,
+            center.longitude + cos(2 * pi / 6.0) / 20.0,
+          ),
+          iconImage: iconImage),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(3 * pi / 6.0) / 20.0,
+            center.longitude + cos(3 * pi / 6.0) / 20.0,
+          ),
+          iconImage: iconImage),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(4 * pi / 6.0) / 20.0,
+            center.longitude + cos(4 * pi / 6.0) / 20.0,
+          ),
+          iconImage: iconImage),
+    ];
+    controller.addAllSymbol(options);
+    setState(() {
+      _symbolCount += 4;
+    });
+  }
+
   void _remove() {
     controller.removeSymbol(_selectedSymbol);
     setState(() {
@@ -205,8 +238,8 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                           onPressed: () => (_symbolCount == 12) ? null : _add("airport-15"),
                         ),
                         FlatButton(
-                          child: const Text('add (custom icon)'),
-                          onPressed: () => (_symbolCount == 12) ? null : _add("custom-icon.png"),
+                          child: const Text('add (multi)'),
+                          onPressed: () => (_symbolCount == 12) ? null : _addMulti('airport-15'),
                         ),
                         FlatButton(
                           child: const Text('remove'),
