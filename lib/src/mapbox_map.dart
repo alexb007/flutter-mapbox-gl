@@ -22,6 +22,7 @@ class MapboxMap extends StatefulWidget {
     this.trackCameraPosition = false,
     this.myLocationEnabled = false,
     this.myLocationTrackingMode = MyLocationTrackingMode.Tracking,
+    this.locationForegroundDrawable,
     this.onMapClick,
     this.onCameraTrackingDismissed,
   }) : assert(initialCameraPosition != null);
@@ -89,6 +90,9 @@ class MapboxMap extends StatefulWidget {
 
   /// The mode used to track the user location on the map
   final MyLocationTrackingMode myLocationTrackingMode;
+
+  /// Location Foreground Drawable
+  final Image locationForegroundDrawable;
 
   /// Which gestures should be consumed by the map.
   ///
@@ -197,6 +201,7 @@ class _MapboxMapOptions {
     this.zoomGesturesEnabled,
     this.myLocationEnabled,
     this.myLocationTrackingMode,
+    this.locationForegroundDrawable,
   });
 
   static _MapboxMapOptions fromWidget(MapboxMap map) {
@@ -212,6 +217,7 @@ class _MapboxMapOptions {
       zoomGesturesEnabled: map.zoomGesturesEnabled,
       myLocationEnabled: map.myLocationEnabled,
       myLocationTrackingMode: map.myLocationTrackingMode,
+      locationForegroundDrawable: map.locationForegroundDrawable,
     );
   }
 
@@ -237,6 +243,8 @@ class _MapboxMapOptions {
 
   final MyLocationTrackingMode myLocationTrackingMode;
 
+  final Image locationForegroundDrawable;
+
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> optionsMap = <String, dynamic>{};
 
@@ -257,6 +265,7 @@ class _MapboxMapOptions {
     addIfNonNull('trackCameraPosition', trackCameraPosition);
     addIfNonNull('myLocationEnabled', myLocationEnabled);
     addIfNonNull('myLocationTrackingMode', myLocationTrackingMode?.index);
+    addIfNonNull('locationForegroundDrawable', locationForegroundDrawable);
     return optionsMap;
   }
 

@@ -5,6 +5,11 @@
 package com.mapbox.mapboxgl;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Base64;
 import android.util.Log;
 
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -18,91 +23,101 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 class MapboxMapBuilder implements MapboxMapOptionsSink {
-  public final String TAG = getClass().getSimpleName();
-  private final MapboxMapOptions options = new MapboxMapOptions()
-    .textureMode(true)
-    .attributionEnabled(false);
-  private boolean trackCameraPosition = false;
-  private boolean myLocationEnabled = false;
-  private int myLocationTrackingMode = 0;
-  private String styleString = Style.MAPBOX_STREETS;
+    public final String TAG = getClass().getSimpleName();
+    private final MapboxMapOptions options = new MapboxMapOptions()
+            .textureMode(true)
+            .attributionEnabled(false);
+    private boolean trackCameraPosition = false;
+    private boolean myLocationEnabled = false;
+    private int myLocationTrackingMode = 0;
+    private Object locationForegroundDrawable = null;
+    private String styleString = Style.MAPBOX_STREETS;
+    private Context context;
 
-  MapboxMapController build(
-    int id, Context context, AtomicInteger state, PluginRegistry.Registrar registrar) {
-    final MapboxMapController controller =
-      new MapboxMapController(id, context, state, registrar, options, styleString);
-    controller.init();
-    controller.setMyLocationEnabled(myLocationEnabled);
-    controller.setMyLocationTrackingMode(myLocationTrackingMode);
-    controller.setTrackCameraPosition(trackCameraPosition);
-    return controller;
-  }
-
-  public void setInitialCameraPosition(CameraPosition position) {
-    options.camera(position);
-  }
-
-  @Override
-  public void setCompassEnabled(boolean compassEnabled) {
-    options.compassEnabled(compassEnabled);
-  }
-
-  @Override
-  public void setCameraTargetBounds(LatLngBounds bounds) {
-    Log.e(TAG, "setCameraTargetBounds is supported only after map initiated.");
-    //throw new UnsupportedOperationException("setCameraTargetBounds is supported only after map initiated.");
-    //options.latLngBoundsForCameraTarget(bounds);
-  }
-
-  @Override
-  public void setStyleString(String styleString) {
-    this.styleString = styleString;
-    //options. styleString(styleString);
-  }
-
-  @Override
-  public void setMinMaxZoomPreference(Float min, Float max) {
-    if (min != null) {
-      options.minZoomPreference(min);
+    MapboxMapController build(
+            int id, Context context, AtomicInteger state, PluginRegistry.Registrar registrar) {
+        final MapboxMapController controller =
+                new MapboxMapController(id, context, state, registrar, options, styleString);
+        this.context = context;
+        controller.init();
+        controller.setMyLocationEnabled(myLocationEnabled);
+        controller.setMyLocationTrackingMode(myLocationTrackingMode);
+        controller.setTrackCameraPosition(trackCameraPosition);
+        controller.setLocationForegroundDrawable(locationForegroundDrawable);
+        return controller;
     }
-    if (max != null) {
-      options.maxZoomPreference(max);
+
+    public void setInitialCameraPosition(CameraPosition position) {
+        options.camera(position);
     }
-  }
 
-  @Override
-  public void setTrackCameraPosition(boolean trackCameraPosition) {
-    this.trackCameraPosition = trackCameraPosition;
-  }
+    @Override
+    public void setCompassEnabled(boolean compassEnabled) {
+        options.compassEnabled(compassEnabled);
+    }
 
-  @Override
-  public void setRotateGesturesEnabled(boolean rotateGesturesEnabled) {
-    options.rotateGesturesEnabled(rotateGesturesEnabled);
-  }
+    @Override
+    public void setCameraTargetBounds(LatLngBounds bounds) {
+        Log.e(TAG, "setCameraTargetBounds is supported only after map initiated.");
+        //throw new UnsupportedOperationException("setCameraTargetBounds is supported only after map initiated.");
+        //options.latLngBoundsForCameraTarget(bounds);
+    }
 
-  @Override
-  public void setScrollGesturesEnabled(boolean scrollGesturesEnabled) {
-    options.scrollGesturesEnabled(scrollGesturesEnabled);
-  }
+    @Override
+    public void setStyleString(String styleString) {
+        this.styleString = styleString;
+        //options. styleString(styleString);
+    }
 
-  @Override
-  public void setTiltGesturesEnabled(boolean tiltGesturesEnabled) {
-    options.tiltGesturesEnabled(tiltGesturesEnabled);
-  }
+    @Override
+    public void setMinMaxZoomPreference(Float min, Float max) {
+        if (min != null) {
+            options.minZoomPreference(min);
+        }
+        if (max != null) {
+            options.maxZoomPreference(max);
+        }
+    }
 
-  @Override
-  public void setZoomGesturesEnabled(boolean zoomGesturesEnabled) {
-    options.zoomGesturesEnabled(zoomGesturesEnabled);
-  }
+    @Override
+    public void setTrackCameraPosition(boolean trackCameraPosition) {
+        this.trackCameraPosition = trackCameraPosition;
+    }
 
-  @Override
-  public void setMyLocationEnabled(boolean myLocationEnabled) {
-    this.myLocationEnabled = myLocationEnabled;
-  }
+    @Override
+    public void setRotateGesturesEnabled(boolean rotateGesturesEnabled) {
+        options.rotateGesturesEnabled(rotateGesturesEnabled);
+    }
 
-  @Override
-  public void setMyLocationTrackingMode(int myLocationTrackingMode) {
-    this.myLocationTrackingMode = myLocationTrackingMode;
-  }
+    @Override
+    public void setScrollGesturesEnabled(boolean scrollGesturesEnabled) {
+        options.scrollGesturesEnabled(scrollGesturesEnabled);
+    }
+
+    @Override
+    public void setTiltGesturesEnabled(boolean tiltGesturesEnabled) {
+        options.tiltGesturesEnabled(tiltGesturesEnabled);
+    }
+
+    @Override
+    public void setZoomGesturesEnabled(boolean zoomGesturesEnabled) {
+        options.zoomGesturesEnabled(zoomGesturesEnabled);
+    }
+
+    @Override
+    public void setMyLocationEnabled(boolean myLocationEnabled) {
+        this.myLocationEnabled = myLocationEnabled;
+    }
+
+    @Override
+    public void setMyLocationTrackingMode(int myLocationTrackingMode) {
+        this.myLocationTrackingMode = myLocationTrackingMode;
+    }
+
+    @Override
+    public void setLocationForegroundDrawable(Object locationForegroundDrawable) {
+        this.locationForegroundDrawable = locationForegroundDrawable;
+    }
+
 
 }

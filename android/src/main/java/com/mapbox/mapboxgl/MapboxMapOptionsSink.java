@@ -4,6 +4,8 @@
 
 package com.mapbox.mapboxgl;
 
+import android.graphics.drawable.Drawable;
+
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 
 /**
@@ -30,6 +32,8 @@ interface MapboxMapOptionsSink {
   void setZoomGesturesEnabled(boolean zoomGesturesEnabled);
 
   void setMyLocationEnabled(boolean myLocationEnabled);
+
+  void setLocationForegroundDrawable(Object locationForegroundDrawable);
 
   void setMyLocationTrackingMode(int myLocationTrackingMode);
 }
