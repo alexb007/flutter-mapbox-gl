@@ -151,6 +151,8 @@ class MapboxMapController extends ChangeNotifier {
           onCameraTrackingDismissed();
         }
         break;
+      case 'navigation#set':
+
       default:
         throw MissingPluginException();
     }
@@ -192,6 +194,19 @@ class MapboxMapController extends ChangeNotifier {
     await _channel.invokeMethod('camera#move', <String, dynamic>{
       'cameraUpdate': cameraUpdate._toJson(),
     });
+  }
+
+  Future<bool> setNavigation(String routeJSON) async {
+    final bool isSet = await _channel.invokeMethod(
+        'navigation#set', <String, String>{'routeJson': routeJSON});
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> startNavigation() async {
+    final bool isStarted = await _channel.invokeMethod('navigation#start', null);
+    notifyListeners();
+    return isStarted;
   }
 
   /// Adds a symbol to the map, configured using the specified custom [options].
@@ -237,7 +252,8 @@ class MapboxMapController extends ChangeNotifier {
     var index = 0;
 
     symbolIds.forEach((symbolId) {
-      var effectiveOptions = SymbolOptions.defaultOptions.copyWith(options[index++]);
+      var effectiveOptions =
+          SymbolOptions.defaultOptions.copyWith(options[index++]);
       final Symbol symbol = Symbol(symbolId, effectiveOptions);
       _symbols[symbolId] = symbol;
       symbols.add(symbol);
@@ -398,7 +414,7 @@ class MapboxMapController extends ChangeNotifier {
   /// been notified.
   Future<Circle> addCircle(CircleOptions options) async {
     final CircleOptions effectiveOptions =
-    CircleOptions.defaultOptions.copyWith(options);
+        CircleOptions.defaultOptions.copyWith(options);
     final String circleId = await _channel.invokeMethod(
       'circle#add',
       <String, dynamic>{
@@ -429,7 +445,6 @@ class MapboxMapController extends ChangeNotifier {
     circle._options = circle._options.copyWith(changes);
     notifyListeners();
   }
-
 
   /// Removes the specified [circle] from the map. The circle must be a current
   /// member of the [circles] set.

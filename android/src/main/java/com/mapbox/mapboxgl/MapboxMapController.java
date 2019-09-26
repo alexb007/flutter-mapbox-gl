@@ -46,6 +46,13 @@ import com.mapbox.mapboxsdk.plugins.annotation.LineManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
 
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
@@ -107,6 +114,11 @@ final class MapboxMapController
     private final Context context;
     private final String styleStringInitial;
     private LocationComponent locationComponent = null;
+    private DirectionsRoute currentRoute;
+    private NavigationMapRoute navigationMapRoute;
+    private Activity activity;
+
+
 
     MapboxMapController(
             int id,
@@ -262,6 +274,27 @@ final class MapboxMapController
             throw new IllegalArgumentException("Unknown symbol: " + circleId);
         }
         return circle;
+    }
+
+    private void setNavigationMapRoute(DirectionsRoute route) {
+        this.currentRoute = route;
+        if (navigationMapRoute != null) {
+            navigationMapRoute.removeRoute();
+        } else {
+            navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, com.mapbox.mapboxgl.R.style.NavigationMapRoute);
+        }
+        navigationMapRoute.addRoute(currentRoute);
+    }
+
+
+    private void startNavigation() {
+
+        NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                .directionsRoute(currentRoute)
+                .shouldSimulateRoute(true)
+                .build();
+// Call this method with Context from within an Activity
+        NavigationLauncher.startNavigation(activity, options);
     }
 
     @Override
@@ -496,10 +529,26 @@ final class MapboxMapController
                 result.success(null);
                 break;
             }
+            case "navigation#set": {
+                final DirectionsRoute route = DirectionsRoute.fromJson(call.argument("routeJson").toString());
+                setNavigationMapRoute(route);
+                result.success(true);
+                break;
+            }
+
+            case "navigation#start": {
+                startNavigation();
+                result.success(true);
+                break;
+            }
+
+
             default:
                 result.notImplemented();
         }
     }
+
+
 
     @Override
     public void onCameraMoveStarted(int reason) {
@@ -618,6 +667,7 @@ final class MapboxMapController
         if (disposed || activity.hashCode() != registrarActivityHashCode) {
             return;
         }
+        this.activity = activity;
         mapView.onCreate(savedInstanceState);
     }
 
@@ -625,6 +675,9 @@ final class MapboxMapController
     public void onActivityStarted(Activity activity) {
         if (disposed || activity.hashCode() != registrarActivityHashCode) {
             return;
+        }
+        if (navigationMapRoute != null) {
+            navigationMapRoute.onStart();
         }
         mapView.onStart();
     }
@@ -650,6 +703,10 @@ final class MapboxMapController
         if (disposed || activity.hashCode() != registrarActivityHashCode) {
             return;
         }
+        if (navigationMapRoute != null) {
+            navigationMapRoute.onStop();
+        }
+
         mapView.onStop();
     }
 

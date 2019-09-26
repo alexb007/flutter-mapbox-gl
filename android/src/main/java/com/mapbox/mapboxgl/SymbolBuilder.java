@@ -151,12 +151,7 @@ class SymbolBuilder implements SymbolOptionsSink {
   }
 
   @Override
-  public void setZIndex(int zIndex) {
-    symbolOptions.withZIndex(zIndex);
-  }
-
-  @Override
   public void setDraggable(boolean draggable) {
-    symbolOptions.setDraggable(draggable);
+    symbolOptions.withDraggable(draggable);
   }
 }

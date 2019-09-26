@@ -159,11 +159,6 @@ class SymbolController implements SymbolOptionsSink {
   }
 
   @Override
-  public void setZIndex(int zIndex) {
-    symbol.setZIndex(zIndex);
-  }
-
-  @Override
   public void setGeometry(LatLng geometry) {
     symbol.setGeometry(Point.fromLngLat(geometry.getLongitude(), geometry.getLatitude()));
   }
